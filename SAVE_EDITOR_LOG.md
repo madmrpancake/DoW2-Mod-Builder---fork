@@ -22,6 +22,8 @@ Each line is a decision point, what you chose, and the result.
 | 16 | Investigate why gear lists are partial, or wait for an in-game comparison? | You asked how the on-screen "Existing Campaigns" map to the saves | Found them: the 21 campaigns are Steam Cloud files `...\Steam\userdata\1479867\56400\remote\campaign_<Race>_<n>.sav` (about 4 KB each). They are not the 3 `.sv` files. Same record layout as the `CAMS` chunk. |
 | 17 | Point the Save Editor at the Steam Cloud folder and read these `.sav` files? | Yes (also add a README step) | Save Editor now lists the 21 cloud `campaign_*.sav` files (read-only) next to the `.sv` files. README documents the folder. |
 | 18 | Do the cloud saves' XP and gear match the game? (You also told me the three `.sv` files were copied from another computer for testing; they are not your campaigns.) | Yes, proceed | Partial check using your screenshot: all 5 visible entries show "Level 1", and the XP read from each file maps to level 1 (level 2 needs 150 XP). Not yet checked: exact XP and gear, which need a hero screen in game. |
+| 19 | Which campaign did you load to check the Force Commander? | The Sep 13 Space Marines campaign, shown with save date Sat Nov 07 13:10:14 2026, Level 1, Easy | Confirmed: it is `campaign_Space Marines_2.sav`, rewritten by the game when loaded (file time 1:10:14 PM matches). The Force Commander reads 75 XP = level 1, which agrees. The game shows no XP or gear screen, so exact values can't be compared directly. |
+| 20 | Play the campaign, change one thing at a time, and diff the file against the snapshot in `workspace\save_snapshots`? | **Pending** | |
 
 ## Mapping in-game campaigns to files
 
