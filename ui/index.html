@@ -2249,6 +2249,19 @@ async function svLoad(){
   $('#sv_body').innerHTML = '<div class="hint">reading save…</div>';
   try{
     const r = await api(`/api/saves?game=${S.active_game}&file=${encodeURIComponent(f)}`);
+    if(r.chunky){
+      SV = null;
+      $('#sv_apply').disabled = true;
+      const nm = b => esc((b.split('\\').pop()||b).replace(/^sm_|^eld_|^ig_|^ork_/,'').replace(/_/g,' '));
+      $('#sv_body').innerHTML = `<div class="banner warn"><div><b>Read-only: this is a Retribution
+        (${esc(r.chunky.format)}) save.</b> Editing it isn't supported yet — the heroes and XP below
+        are shown for reference only and nothing is written.</div></div>
+        <div class="grid" style="margin:18px 0">` + (r.chunky.heroes.length
+          ? r.chunky.heroes.map(h=>`<div class="card"><b>${nm(h.blueprint)}</b><br>
+              <span class="hint">XP ${h.xp}</span></div>`).join('')
+          : '<div class="hint">No heroes recognised in this save.</div>') + '</div>';
+      return;
+    }
     SV = r.save; SV._edited = false; SV._renameFile = false;
     try{ await ensureCatalog(); }catch(e){ /* names fall back to ids */ }
     svRender();

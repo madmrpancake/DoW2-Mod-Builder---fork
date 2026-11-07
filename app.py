@@ -916,12 +916,19 @@ def saves_dir(game: str) -> Path:
     return base / "Saved Games"
 
 
+SAVE_EXTS = (".sav", ".sv")
+
+
+def _list_saves(d: Path) -> list:
+    return sorted(p for p in d.iterdir() if p.is_file() and p.suffix.lower() in SAVE_EXTS)
+
+
 def _save_path(game: str, name: str) -> Path:
     """Resolve a save name to a file inside that game's Saved Games folder."""
     if not name or "/" in name or "\\" in name or name.startswith("."):
         raise ValueError("bad save name")
     p = (saves_dir(game) / name).resolve()
-    if p.parent != saves_dir(game).resolve() or p.suffix.lower() != ".sav":
+    if p.parent != saves_dir(game).resolve() or p.suffix.lower() not in SAVE_EXTS:
         raise ValueError("saves can only be read from the game's Saved Games folder")
     return p
 
@@ -1024,21 +1031,26 @@ def api_saves(query: dict) -> dict:
     sdir = saves_dir(game)
     files = []
     if sdir.exists():
-        for p in sorted(sdir.glob("*.sav")):
+        for p in _list_saves(sdir):
             files.append({"name": p.name, "bytes": p.stat().st_size,
                           "modified": time.strftime("%Y-%m-%d %H:%M",
                                                     time.localtime(p.stat().st_mtime))})
     backups = []
     bdir = sdir / "PA_backups"
     if bdir.exists():
-        for p in sorted(bdir.glob("*.sav"), reverse=True)[:20]:
+        for p in sorted(_list_saves(bdir), reverse=True)[:20]:
             backups.append({"name": p.name, "bytes": p.stat().st_size})
     out = {"game": game, "dir": str(sdir), "exists": sdir.exists(),
            "files": files, "backups": backups}
     name = query.get("file")
     if name:
         import savefile
-        model = savefile.parse(_save_path(game, name))
+        import chunkysave
+        path = _save_path(game, name)
+        if chunkysave.is_chunky(path):
+            out["chunky"] = chunkysave.summarize(path)
+            return out
+        model = savefile.parse(path)
         d = savefile.describe(model)
         tbl = _level_table(game)
         for s in d["squads"]:
@@ -1189,7 +1201,7 @@ def action_restore_save(body):
     src = (bdir / name).resolve()
     if src.parent != bdir.resolve() or not src.exists():
         raise ValueError("backup not found")
-    target = saves_dir(game) / (name.rsplit("_", 2)[0] + ".sav")
+    target = saves_dir(game) / (name.rsplit("_", 2)[0] + src.suffix)
     shutil.copy2(src, target)
     log(f"[saves] restored {target.name} from {name}")
     return {"ok": True, "restored": str(target)}
