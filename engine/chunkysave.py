@@ -82,26 +82,34 @@ def _heroes_in_record(b: bytes) -> list[dict]:
     return heroes
 
 
-def _gear_after(b: bytes, pos: int) -> list[str]:
-    """Wargear strings recorded right after a hero (unverified layout).
-
-    Stops at the next hero or at any other text between entries.
-    """
-    gear = []
-    while True:
-        m = _CAMS_ITEM.search(b, pos)
-        if not m or b"sbps\\" in b[pos:m.start() + 12]:
-            break
-        gap = b[pos:m.start()]
-        if gear and _TEXT.search(gap):
+def _items_between(b: bytes, pos: int, end: int) -> list[str]:
+    """Wargear entries in b[pos:end]. A real entry is followed by a 0/1 flag
+    byte; other wargear-looking strings (e.g. upgrade rewards) are skipped."""
+    out, last = [], pos
+    for m in _CAMS_ITEM.finditer(b, pos, end):
+        if m.start() - last > 300:  # far-away entries belong to other tables
             break
         start, n = m.start() + 4, m.group(1)[0]
         name = b[start:start + n]
         if len(name) != n or not re.fullmatch(rb"[\x20-\x7e]+", name):
-            break
-        gear.append(name.decode("latin1"))
-        pos = start + n
-    return gear
+            continue
+        if start + n < len(b) and b[start + n] in (0, 1):
+            out.append(name.decode("latin1"))
+            last = start + n
+    return out
+
+
+def _gear_after(b: bytes, pos: int) -> list[str]:
+    """Wargear equipped by the hero whose record ends at ``pos``: the entries
+    between it and the next hero (matches the in-game equipment screens)."""
+    nxt = _CAMS_SBP.search(b, pos)
+    return _items_between(b, pos, nxt.start() if nxt else len(b))
+
+
+def _stash_in_record(b: bytes) -> list[str]:
+    """Unequipped wargear: entries before the first hero record."""
+    first = _CAMS_SBP.search(b)
+    return _items_between(b, 0, first.start()) if first else []
 
 
 def summarize_cloud(path: str | Path) -> dict:
@@ -111,7 +119,8 @@ def summarize_cloud(path: str | Path) -> dict:
     Relic Chunky wrapper.
     """
     return {"format": "Steam Cloud campaign", "source": "cloud",
-            "heroes": _heroes_in_record(Path(path).read_bytes())}
+            "heroes": _heroes_in_record(Path(path).read_bytes()),
+            "stash": _stash_in_record(Path(path).read_bytes())}
 
 
 def summarize(path: str | Path) -> dict:

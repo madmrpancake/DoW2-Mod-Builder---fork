@@ -2259,9 +2259,11 @@ async function svLoad(){
         <div class="grid" style="margin:18px 0">` + (r.chunky.heroes.length
           ? r.chunky.heroes.map(h=>`<div class="card"><b>${nm(h.blueprint)}</b><br>
               <span class="hint">XP ${h.xp}</span>
-              ${(h.gear||[]).length ? `<div class="hint" style="margin-top:6px">Gear (partial, unverified):<br>`
+              ${(h.gear||[]).length ? `<div class="hint" style="margin-top:6px">Equipped gear:<br>`
                 + h.gear.map(g=>esc((g.split('\\').pop()||g).replace(/_/g,' '))).join('<br>') + '</div>' : ''}</div>`).join('')
-          : '<div class="hint">No heroes recognised in this save.</div>') + '</div>';
+          : '<div class="hint">No heroes recognised in this save.</div>') + '</div>'
+        + ((r.chunky.stash||[]).length ? `<div class="hint">Unequipped stash: `
+          + r.chunky.stash.map(g=>esc((g.split('\\').pop()||g).replace(/_/g,' '))).join(', ') + '</div>' : '');
       return;
     }
     SV = r.save; SV._edited = false; SV._renameFile = false;
