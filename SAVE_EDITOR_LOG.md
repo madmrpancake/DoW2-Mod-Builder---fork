@@ -21,6 +21,7 @@ Each line is a decision point, what you chose, and the result.
 | 15 | Which XP is right for Cyrus: 50.0 (campaign chunk) or 49.5 (old Lua value)? All 4 Space Marines values differ by 0.5 | **Pending (needs your check in game)** | |
 | 16 | Investigate why gear lists are partial, or wait for an in-game comparison? | You asked how the on-screen "Existing Campaigns" map to the saves | Found them: the 21 campaigns are Steam Cloud files `...\Steam\userdata\1479867\56400\remote\campaign_<Race>_<n>.sav` (about 4 KB each). They are not the 3 `.sv` files. Same record layout as the `CAMS` chunk. |
 | 17 | Point the Save Editor at the Steam Cloud folder and read these `.sav` files? | Yes (also add a README step) | Save Editor now lists the 21 cloud `campaign_*.sav` files (read-only) next to the `.sv` files. README documents the folder. |
+| 18 | Do the cloud saves' XP and gear match the game? (You also told me the three `.sv` files were copied from another computer for testing; they are not your campaigns.) | Yes, proceed | Partial check using your screenshot: all 5 visible entries show "Level 1", and the XP read from each file maps to level 1 (level 2 needs 150 XP). Not yet checked: exact XP and gear, which need a hero screen in game. |
 
 ## Mapping in-game campaigns to files
 
