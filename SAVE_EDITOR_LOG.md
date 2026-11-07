@@ -17,12 +17,13 @@ Each line is a decision point, what you chose, and the result.
 | 11 | Move the work into a git repo on a feature branch? | Yes; do not track `workspace/`, `knowledge/`, `gamedata/` | `main` = originals; `feature/sv-save-support` = our changes. |
 | 12 | Are we caught up on "Read-only first"? | (this question) | Mostly: names and XP for Space Marines only. No gear, no Orks/Imperial Guard heroes, nothing verified in game. |
 | 13 | Start with the Orks save (heroes and gear)? | Yes | Found the real hero data in the campaign chunk `SCEN/APPD/CAMP/CAMS`, not the Lua blob. Orks (4 heroes), Imperial Guard (4) and Space Marines (4) all list now. Gear sits next to each hero but is unmapped. |
-| 14 | Show gear in the viewer (labelled unverified), or verify the layout against the game first? | **Pending** | |
+| 14 | Show gear in the viewer (labelled unverified), or verify the layout against the game first? | Show it, labelled unverified | Gear listed per hero from the campaign chunk. Heroes often show only 1-4 items (no weapons for some), so the list is partial. |
 | 15 | Which XP is right for Cyrus: 50.0 (campaign chunk) or 49.5 (old Lua value)? All 4 Space Marines values differ by 0.5 | **Pending (needs your check in game)** | |
 
 ## Open items
 - Confirm the XP values in game (Orks 183.9 / 133.9 / 90.9 / 32.8; Space Marines 224.7 / 180.7 / 147.7 / 50.0).
 - Confirm the UI panel renders.
+- Gear list looks partial (e.g. Mekboy shows only a stikkbomb); needs checking against the game.
 - Map gear to heroes.
 - Add a `CHANGELOG.md` entry.
 - Decide on a remote and push.

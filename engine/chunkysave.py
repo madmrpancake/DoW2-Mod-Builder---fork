@@ -50,6 +50,8 @@ def _find_chunk(d: bytes, wanted: list[str]) -> tuple[int, int]:
     raise ChunkyError("chunk not found")
 
 
+_CAMS_ITEM = re.compile(rb"(.)\x00\x00\x00wargear\\", re.S)
+_TEXT = re.compile(rb"[\x20-\x7e]{6,}")
 _CAMS_SBP = re.compile(rb"(.)\x00\x00\x00sbps\\", re.S)
 
 
@@ -71,8 +73,31 @@ def _campaign_heroes(d: bytes) -> list[dict]:
             continue
         seen.add(name)
         heroes.append({"xp": round(struct.unpack_from("<f", b, start + n)[0], 1),
-                       "blueprint": name.decode("latin1")})
+                       "blueprint": name.decode("latin1"),
+                       "gear": _gear_after(b, start + n + 4)})
     return heroes
+
+
+def _gear_after(b: bytes, pos: int) -> list[str]:
+    """Wargear strings recorded right after a hero (unverified layout).
+
+    Stops at the next hero or at any other text between entries.
+    """
+    gear = []
+    while True:
+        m = _CAMS_ITEM.search(b, pos)
+        if not m or b"sbps\\" in b[pos:m.start() + 12]:
+            break
+        gap = b[pos:m.start()]
+        if gear and _TEXT.search(gap):
+            break
+        start, n = m.start() + 4, m.group(1)[0]
+        name = b[start:start + n]
+        if len(name) != n or not re.fullmatch(rb"[\x20-\x7e]+", name):
+            break
+        gear.append(name.decode("latin1"))
+        pos = start + n
+    return gear
 
 
 def summarize(path: str | Path) -> dict:
