@@ -20,7 +20,7 @@ Each line is a decision point, what you chose, and the result.
 | 14 | Show gear in the viewer (labelled unverified), or verify the layout against the game first? | Show it, labelled unverified | Gear listed per hero from the campaign chunk. Heroes often show only 1-4 items (no weapons for some), so the list is partial. |
 | 15 | Which XP is right for Cyrus: 50.0 (campaign chunk) or 49.5 (old Lua value)? All 4 Space Marines values differ by 0.5 | **Pending (needs your check in game)** | |
 | 16 | Investigate why gear lists are partial, or wait for an in-game comparison? | You asked how the on-screen "Existing Campaigns" map to the saves | Found them: the 21 campaigns are Steam Cloud files `...\Steam\userdata\1479867\56400\remote\campaign_<Race>_<n>.sav` (about 4 KB each). They are not the 3 `.sv` files. Same record layout as the `CAMS` chunk. |
-| 17 | Point the Save Editor at the Steam Cloud folder and read these `.sav` files? | **Pending** | |
+| 17 | Point the Save Editor at the Steam Cloud folder and read these `.sav` files? | Yes (also add a README step) | Save Editor now lists the 21 cloud `campaign_*.sav` files (read-only) next to the `.sv` files. README documents the folder. |
 
 ## Mapping in-game campaigns to files
 

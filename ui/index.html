@@ -2233,9 +2233,9 @@ async function svList(){
     sel.innerHTML = r.files.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join('')
       || '<option value="">no saves found</option>';
     if(had && r.files.some(f=>f.name===had)) sel.value = had;
-    $('#sv_meta').textContent = r.exists
+    $('#sv_meta').textContent = (r.exists
       ? `${r.files.length} save${r.files.length===1?'':'s'} in ${r.dir}`
-      : `no Saved Games folder at ${r.dir}`;
+      : `no Saved Games folder at ${r.dir}`) + (r.cloud_dir ? ` + Steam Cloud: ${r.cloud_dir}` : '');
     SV = null;
     if(r.files.length) svLoad(); else $('#sv_body').innerHTML =
       `<div class="empty"><div class="big">No campaign saves for this game</div>

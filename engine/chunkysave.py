@@ -56,13 +56,17 @@ _CAMS_SBP = re.compile(rb"(.)\x00\x00\x00sbps\\", re.S)
 
 
 def _campaign_heroes(d: bytes) -> list[dict]:
-    """Heroes from the campaign-state chunk SCEN/APPD/CAMP/CAMS.
+    """Heroes from the campaign-state chunk SCEN/APPD/CAMP/CAMS."""
+    off, size = _find_chunk(d, ["SCEN", "APPD", "CAMP", "CAMS"])
+    return _heroes_in_record(d[off:off + size])
+
+
+def _heroes_in_record(b: bytes) -> list[dict]:
+    """Heroes in a campaign record (the CAMS body, or a whole cloud ``.sav``).
 
     Each hero is a length-prefixed ``sbps\\...`` string followed by an f32 XP.
     The same blueprint may reappear later with 0.0; only the first is kept.
     """
-    off, size = _find_chunk(d, ["SCEN", "APPD", "CAMP", "CAMS"])
-    b = d[off:off + size]
     seen, heroes = set(), []
     for m in _CAMS_SBP.finditer(b):
         start, n = m.start() + 4, m.group(1)[0]
@@ -98,6 +102,16 @@ def _gear_after(b: bytes, pos: int) -> list[str]:
         gear.append(name.decode("latin1"))
         pos = start + n
     return gear
+
+
+def summarize_cloud(path: str | Path) -> dict:
+    """Read-only summary of a Steam Cloud ``campaign_<Race>_<n>.sav``.
+
+    These hold the same campaign record as the CAMS chunk, without the
+    Relic Chunky wrapper.
+    """
+    return {"format": "Steam Cloud campaign", "source": "cloud",
+            "heroes": _heroes_in_record(Path(path).read_bytes())}
 
 
 def summarize(path: str | Path) -> dict:

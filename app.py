@@ -918,16 +918,59 @@ def saves_dir(game: str) -> Path:
 
 SAVE_EXTS = (".sav", ".sv")
 
+# Steam app id per game; Retribution keeps its campaigns in Steam Cloud
+_STEAM_APPIDS = {"retribution": "56400"}
+
+
+def steam_cloud_dir(game: str) -> Path | None:
+    """Folder holding the game's Steam Cloud campaign saves, if there is one.
+
+    Override with ``games.<game>.steam_cloud_path`` in settings. Otherwise look
+    in ``userdata\\<account>\\<appid>\\remote`` under every Steam folder and take
+    the account with the most ``campaign_*.sav`` files.
+    """
+    override = settings().get("games", {}).get(game, {}).get("steam_cloud_path")
+    if override:
+        p = Path(override)
+        return p if p.is_dir() else None
+    appid = _STEAM_APPIDS.get(game)
+    if not appid:
+        return None
+    import bootstrap
+    best, best_n = None, 0
+    for lib in bootstrap._steam_libraries():
+        try:
+            for acct in (lib / "userdata").iterdir():
+                remote = acct / appid / "remote"
+                n = len(list(remote.glob("campaign_*.sav"))) if remote.is_dir() else 0
+                if n > best_n:
+                    best, best_n = remote, n
+        except OSError:
+            continue
+    return best
+
 
 def _list_saves(d: Path) -> list:
     return sorted(p for p in d.iterdir() if p.is_file() and p.suffix.lower() in SAVE_EXTS)
 
 
+def _is_cloud_save(game: str, p: Path) -> bool:
+    cdir = steam_cloud_dir(game)
+    return bool(cdir) and p.parent == cdir.resolve()
+
+
 def _save_path(game: str, name: str) -> Path:
-    """Resolve a save name to a file inside that game's Saved Games folder."""
+    """Resolve a save name to a file in the game's Saved Games or Steam Cloud folder."""
     if not name or "/" in name or "\\" in name or name.startswith("."):
         raise ValueError("bad save name")
     p = (saves_dir(game) / name).resolve()
+    if not p.exists():
+        cdir = steam_cloud_dir(game)
+        if cdir and (cdir / name).exists():
+            p = (cdir / name).resolve()
+            if p.parent != cdir.resolve() or p.suffix.lower() != ".sav":
+                raise ValueError("bad save name")
+            return p
     if p.parent != saves_dir(game).resolve() or p.suffix.lower() not in SAVE_EXTS:
         raise ValueError("saves can only be read from the game's Saved Games folder")
     return p
@@ -1040,13 +1083,23 @@ def api_saves(query: dict) -> dict:
     if bdir.exists():
         for p in sorted(_list_saves(bdir), reverse=True)[:20]:
             backups.append({"name": p.name, "bytes": p.stat().st_size})
+    cdir = steam_cloud_dir(game)
+    if cdir:
+        for p in sorted(cdir.glob("campaign_*.sav")):
+            files.append({"name": p.name, "bytes": p.stat().st_size, "cloud": True,
+                          "modified": time.strftime("%Y-%m-%d %H:%M",
+                                                    time.localtime(p.stat().st_mtime))})
     out = {"game": game, "dir": str(sdir), "exists": sdir.exists(),
+           "cloud_dir": str(cdir) if cdir else None,
            "files": files, "backups": backups}
     name = query.get("file")
     if name:
         import savefile
         import chunkysave
         path = _save_path(game, name)
+        if _is_cloud_save(game, path):
+            out["chunky"] = chunkysave.summarize_cloud(path)
+            return out
         if chunkysave.is_chunky(path):
             out["chunky"] = chunkysave.summarize(path)
             return out

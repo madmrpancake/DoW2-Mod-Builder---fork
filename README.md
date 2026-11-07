@@ -68,6 +68,20 @@ The **Save Editor** tab reads your campaign saves from
 Close the game before writing: it keeps the campaign in memory and saves over
 your file when you next finish a mission.
 
+### Where Steam Cloud saves are read from
+
+Retribution keeps the campaigns listed under **Existing Campaigns** in Steam
+Cloud, not in `Saved Games`. To list them, the Save Editor looks in
+`<Steam>\userdata\<account id>\56400\remote\` for `campaign_<Race>_<n>.sav`
+(`56400` is the Retribution app id). Every Steam library folder is checked, and
+if several accounts have saves, the one with the most campaigns is used.
+`<n>` counts that race's campaigns from oldest (`_0`), and each file's modified
+time is the date the game shows on the campaign.
+
+These files are shown **read-only** (heroes, XP and partial gear for now). To
+use a different folder, set `steam_cloud_path` for the game in `settings.json`
+under `games` > `retribution`.
+
 Safety: every write first copies the original into `Saved Games\PA_backups`,
 and the new file is read back before it is accepted — if it doesn't parse, your
 original is restored automatically. A save whose layout this build cannot
