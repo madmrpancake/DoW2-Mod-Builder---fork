@@ -1,0 +1,32 @@
+{
+ "mod": {
+  "name": "DamageBuff",
+  "title": "Damage Buff",
+  "description": "+3 damage on chosen plasma weapons, x1.5 defence on terminator armour",
+  "category": "Stat Tweaks"
+ },
+ "modules": {
+  "stat_tweaks": {
+   "enabled": true,
+   "tweaks": [
+    {
+     "stat": "weapon_damage",
+     "op": "add",
+     "value": 3,
+     "targets": [
+      "weapons/weapon/campaign/npc/race_marine/sm_plasma_cannon.rbf",
+      "weapons/weapon/campaign/npc/race_marine/sm_plasma_gun.rbf"
+     ]
+    },
+    {
+     "stat": "armour_defence",
+     "op": "mul",
+     "value": 1.5,
+     "targets": [
+      "wargear/wargear/campaign/playable/race_marine/sm_arm_terminator_armour.rbf"
+     ]
+    }
+   ]
+  }
+ }
+}

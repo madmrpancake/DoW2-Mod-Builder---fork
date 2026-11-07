@@ -1,0 +1,102 @@
+{
+ "mod": {
+  "name": "PlaytestOne",
+  "title": "Playtest One",
+  "description": "Playtest: 10x loot, 2x all weapons, 1.5x armour, 1.3x buffs, 2x mission timers, ability keys moved off WASD",
+  "category": "Playtest"
+ },
+ "modules": {
+  "campaign_loot": {
+   "enabled": true,
+   "drop_chance_multiplier": 10,
+   "drop_level_min_offset": -1,
+   "drop_level_max_offset": 2
+  },
+  "mass_scaling": {
+   "enabled": true,
+   "weapon_damage_multiplier": 2,
+   "armour_defence_multiplier": 1.5,
+   "buff_multiplier": 1.3,
+   "consumable_charges_multiplier": 1,
+   "include_trait_upgrades": true
+  },
+  "campaign_pacing": {
+   "enabled": true,
+   "days_till_expiry_multiplier": 2.5,
+   "days_till_expiry_set": 0,
+   "max_deployments": 5,
+   "xp1_deployments": 3
+  },
+  "ability_hotkeys": {
+   "enabled": true,
+   "remap": {
+    "s": "v",
+    "w": "b",
+    "d": "n"
+   }
+  },
+  "loot_mix": {
+   "enabled": true,
+   "targets": {
+    "chaff": {
+     "common": 0,
+     "rare": 25,
+     "epic": 10,
+     "legendary": 1
+    },
+    "swarm": {
+     "common": 0,
+     "rare": 25,
+     "epic": 15,
+     "legendary": 2
+    },
+    "mini_boss": {
+     "common": 0,
+     "rare": 50,
+     "epic": 35,
+     "legendary": 15
+    },
+    "boss": {
+     "common": 0,
+     "rare": 20,
+     "epic": 55,
+     "legendary": 25
+    },
+    "planet_boss": {
+     "common": 0,
+     "rare": 15,
+     "epic": 45,
+     "legendary": 40
+    }
+   },
+   "include_unused_items": false,
+   "min_per_bucket": 1,
+   "any_level_grades": [],
+   "types": [
+    "weapon",
+    "armour",
+    "accessory",
+    "commander_accessory"
+   ]
+  },
+  "loot_quality": {
+   "enabled": true,
+   "open_pools": {
+    "rare": [
+     "chaff",
+     "mini_boss",
+     "swarm"
+    ],
+    "epic": [
+     "mini_boss"
+    ],
+    "legendary": [
+     "mini_boss"
+    ]
+   },
+   "revive_lost_items": false,
+   "level_min_offset": -1,
+   "level_max_offset": 2
+  }
+ }
+}

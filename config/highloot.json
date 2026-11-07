@@ -1,0 +1,19 @@
+{
+ "mod": {
+  "name": "HighLoot",
+  "title": "High Loot",
+  "description": "5x drops, wider level window",
+  "category": "Campaign Loot"
+ },
+ "modules": {
+  "campaign_loot": {
+   "enabled": true,
+   "drop_chance_multiplier": 7,
+   "type_weight_overrides": {
+    "accessory": 1
+   },
+   "drop_level_min_offset": -5,
+   "drop_level_max_offset": 5
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "mod": {
+  "name": "RarityMix",
+  "title": "Rarity Mix",
+  "description": "4x drops, but mostly blue/purple from bosses and far less white from trash",
+  "category": "Loot"
+ },
+ "game": "dow2cr",
+ "modules": {
+  "campaign_loot": {
+   "enabled": true,
+   "drop_chance_multiplier": 4.0
+  },
+  "loot_mix": {
+   "enabled": true,
+   "targets": {
+    "chaff": {
+     "common": 10,
+     "rare": 40,
+     "epic": 35,
+     "legendary": 15
+    },
+    "swarm": {
+     "common": 20,
+     "rare": 50,
+     "epic": 25,
+     "legendary": 5
+    },
+    "mini_boss": {
+     "common": 0,
+     "rare": 25,
+     "epic": 45,
+     "legendary": 30
+    },
+    "boss": {
+     "common": 0,
+     "rare": 15,
+     "epic": 45,
+     "legendary": 40
+    },
+    "planet_boss": {
+     "common": 0,
+     "rare": 10,
+     "epic": 40,
+     "legendary": 50
+    }
+   },
+   "any_level_grades": [
+    "epic",
+    "legendary"
+   ],
+   "include_unused_items": true,
+   "min_per_bucket": 1
+  }
+ }
+}

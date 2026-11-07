@@ -1,0 +1,20 @@
+{
+ "mod": {
+  "name": "Purity",
+  "title": "Purity of the Chapter",
+  "description": "Half corruption gains, double redemption, 3 accessory slots for all",
+  "category": "Campaign"
+ },
+ "game": "dow2cr",
+ "modules": {
+  "corruption_tuning": {
+   "enabled": true,
+   "gain_multiplier": 0.5,
+   "redemption_multiplier": 2.0
+  },
+  "accessory_slots": {
+   "enabled": true,
+   "set_all": 3
+  }
+ }
+}
