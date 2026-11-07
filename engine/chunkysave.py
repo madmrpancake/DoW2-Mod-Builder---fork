@@ -50,10 +50,41 @@ def _find_chunk(d: bytes, wanted: list[str]) -> tuple[int, int]:
     raise ChunkyError("chunk not found")
 
 
+_CAMS_SBP = re.compile(rb"(.)\x00\x00\x00sbps\\", re.S)
+
+
+def _campaign_heroes(d: bytes) -> list[dict]:
+    """Heroes from the campaign-state chunk SCEN/APPD/CAMP/CAMS.
+
+    Each hero is a length-prefixed ``sbps\\...`` string followed by an f32 XP.
+    The same blueprint may reappear later with 0.0; only the first is kept.
+    """
+    off, size = _find_chunk(d, ["SCEN", "APPD", "CAMP", "CAMS"])
+    b = d[off:off + size]
+    seen, heroes = set(), []
+    for m in _CAMS_SBP.finditer(b):
+        start, n = m.start() + 4, m.group(1)[0]
+        name = b[start:start + n]
+        if len(name) != n or start + n + 4 > len(b) or name in seen:
+            continue
+        if not re.fullmatch(rb"[\x20-\x7e]+", name):
+            continue
+        seen.add(name)
+        heroes.append({"xp": round(struct.unpack_from("<f", b, start + n)[0], 1),
+                       "blueprint": name.decode("latin1")})
+    return heroes
+
+
 def summarize(path: str | Path) -> dict:
     d = Path(path).read_bytes()
     if d[:len(MAGIC)] != MAGIC:
         raise ChunkyError("not a Relic Chunky file")
+    try:
+        heroes = _campaign_heroes(d)
+    except ChunkyError:
+        heroes = []
+    if heroes:
+        return {"format": "Relic Chunky", "source": "CAMS", "heroes": heroes}
     off, size = _find_chunk(d, ["SCEN", "APST", "SCAR", "SCAR", "SLua"])
     blob = d[off:off + size]
     heroes = []
