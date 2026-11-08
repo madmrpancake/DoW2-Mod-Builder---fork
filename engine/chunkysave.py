@@ -12,6 +12,7 @@ string is  u32 4, u32 len, bytes  and a number is  u32 3, f32.
 from __future__ import annotations
 import re
 import struct
+import time
 import zlib
 from pathlib import Path
 
@@ -146,12 +147,14 @@ def summarize(path: str | Path) -> dict:
     return {"format": "Relic Chunky", "lua_bytes": size, "heroes": heroes}
 
 
-def set_cloud_hero_xp(src: str | Path, dest: str | Path, hero: str, xp: float) -> float:
+def set_cloud_hero_xp(src: str | Path, dest: str | Path, hero: str, xp: float,
+                      touch: bool = False) -> float:
     """Write a copy of a cloud ``.sav`` with one hero's XP changed.
 
     ``hero`` is matched against the end of the blueprint name. Only the 4-byte
-    float is replaced, so the file size is unchanged. Returns the old XP. If
-    ``dest`` exists it is backed up to ``<dest>.bak`` first.
+    float is replaced, so the file size is unchanged. With ``touch`` the save
+    date (u32 Unix time at offset 86, shown in the campaign list) is set to now.
+    Returns the old XP. If ``dest`` exists it is backed up to ``<dest>.bak``.
     """
     b = bytearray(Path(src).read_bytes())
     for m in _CAMS_SBP.finditer(bytes(b)):
@@ -160,6 +163,8 @@ def set_cloud_hero_xp(src: str | Path, dest: str | Path, hero: str, xp: float) -
         if name.decode("latin1").endswith(hero):
             old = struct.unpack_from("<f", b, start + n)[0]
             struct.pack_into("<f", b, start + n, float(xp))
+            if touch:
+                struct.pack_into("<I", b, 86, int(time.time()))
             # trailer: CRC32 of b[4:-8], stored in the last 4 bytes
             struct.pack_into("<I", b, len(b) - 4, zlib.crc32(bytes(b[4:-8])))
             dest = Path(dest)
@@ -174,7 +179,8 @@ if __name__ == "__main__":
     import json
     import sys
     if sys.argv[1] == "--set-xp":
-        _, _, s, d, h, x = sys.argv
-        print("old xp", set_cloud_hero_xp(s, d, h, float(x)))
+        args = [a for a in sys.argv if a != "--touch"]
+        _, _, s, d, h, x = args
+        print("old xp", set_cloud_hero_xp(s, d, h, float(x), touch="--touch" in sys.argv))
     else:
         print(json.dumps(summarize(sys.argv[1]), indent=1))

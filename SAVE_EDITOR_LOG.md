@@ -61,3 +61,5 @@ The `.sv` files in `Documents\My Games\Dawn of War II - Retribution\Saved Games`
 - Add a `CHANGELOG.md` entry.
 - Decide on a remote and push.
 
+
+| 23 | Exit the game with Save and Exit (no way to quit without saving); automatically update save timestamp on edit? | Yes | The game rewrote _2 and kept the edit (Cyrus 160 XP, valid CRC). The in-game save date is a u32 Unix time stored inside the file at offset 86, not the file's mtime. Writer now has a touch option that sets it to now (`--touch`). |
