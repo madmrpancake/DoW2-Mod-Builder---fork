@@ -145,7 +145,33 @@ def summarize(path: str | Path) -> dict:
     return {"format": "Relic Chunky", "lua_bytes": size, "heroes": heroes}
 
 
+def set_cloud_hero_xp(src: str | Path, dest: str | Path, hero: str, xp: float) -> float:
+    """Write a copy of a cloud ``.sav`` with one hero's XP changed.
+
+    ``hero`` is matched against the end of the blueprint name. Only the 4-byte
+    float is replaced, so the file size is unchanged. Returns the old XP. If
+    ``dest`` exists it is backed up to ``<dest>.bak`` first.
+    """
+    b = bytearray(Path(src).read_bytes())
+    for m in _CAMS_SBP.finditer(bytes(b)):
+        start, n = m.start() + 4, m.group(1)[0]
+        name = bytes(b[start:start + n])
+        if name.decode("latin1").endswith(hero):
+            old = struct.unpack_from("<f", b, start + n)[0]
+            struct.pack_into("<f", b, start + n, float(xp))
+            dest = Path(dest)
+            if dest.exists():
+                dest.with_name(dest.name + ".bak").write_bytes(dest.read_bytes())
+            dest.write_bytes(bytes(b))
+            return old
+    raise ChunkyError(f"hero {hero!r} not found")
+
+
 if __name__ == "__main__":
     import json
     import sys
-    print(json.dumps(summarize(sys.argv[1]), indent=1))
+    if sys.argv[1] == "--set-xp":
+        _, _, s, d, h, x = sys.argv
+        print("old xp", set_cloud_hero_xp(s, d, h, float(x)))
+    else:
+        print(json.dumps(summarize(sys.argv[1]), indent=1))
