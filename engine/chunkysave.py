@@ -12,6 +12,7 @@ string is  u32 4, u32 len, bytes  and a number is  u32 3, f32.
 from __future__ import annotations
 import re
 import struct
+import zlib
 from pathlib import Path
 
 MAGIC = b"Relic Chunky"
@@ -159,6 +160,8 @@ def set_cloud_hero_xp(src: str | Path, dest: str | Path, hero: str, xp: float) -
         if name.decode("latin1").endswith(hero):
             old = struct.unpack_from("<f", b, start + n)[0]
             struct.pack_into("<f", b, start + n, float(xp))
+            # trailer: CRC32 of b[4:-8], stored in the last 4 bytes
+            struct.pack_into("<I", b, len(b) - 4, zlib.crc32(bytes(b[4:-8])))
             dest = Path(dest)
             if dest.exists():
                 dest.with_name(dest.name + ".bak").write_bytes(dest.read_bytes())
